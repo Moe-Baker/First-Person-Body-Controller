@@ -34,23 +34,18 @@ namespace Game
         {
             get
             {
-                return Mathf.InverseLerp(130f, 0f, Mathf.Abs(freeLookRotation)) * 80f;
+                return Mathf.InverseLerp(130f * 4f, 0f, Mathf.Abs(freeLookRotation)) * 80f;
             }
         }
         public void ApplyVerticalRotation(float value)
         {
-            var spine = animator.GetBoneTransform(HumanBodyBones.Spine);
-            var chest = animator.GetBoneTransform(HumanBodyBones.Chest);
             var neck = animator.GetBoneTransform(HumanBodyBones.Neck);
             var head = animator.GetBoneTransform(HumanBodyBones.Head);
 
-            SetRotation(neck, value / 2f);
-            SetRotation(head, value / 2f);
-            return;
-            SetRotation(spine, value / 3f);
-            SetRotation(chest, value / 3f);
+            SetVerticalRotation(neck, value / 2f);
+            SetVerticalRotation(head, value / 2f);
         }
-        void SetRotation(Transform transform, float value)
+        void SetVerticalRotation(Transform transform, float value)
         {
             var localAngles = transform.localEulerAngles;
 
@@ -63,8 +58,33 @@ namespace Game
         void ApplyFreeLookRotation(float value)
         {
             var neck = animator.GetBoneTransform(HumanBodyBones.Neck);
+            var spine = animator.GetBoneTransform(HumanBodyBones.Spine);
+            var chest = animator.GetBoneTransform(HumanBodyBones.Chest);
 
-            neck.Rotate(Vector3.right, value, Space.Self);
+            neck.Rotate(Vector3.right, value / 3f, Space.Self);
+            spine.Rotate(Vector3.right, value / 3f, Space.Self);
+            chest.Rotate(Vector3.right, value / 3f, Space.Self);
+        }
+
+        float leanAngle = 0f;
+        void ApplyLeanAngle(float value)
+        {
+            var spine = animator.GetBoneTransform(HumanBodyBones.Spine);
+            var chest = animator.GetBoneTransform(HumanBodyBones.Chest);
+
+            spine.Rotate(transform.up * value / 2f);
+            chest.Rotate(transform.up * value / 2f);
+
+            var leftArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+            var RightArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
+
+            if(value != 0f)
+            {
+                if (Mathf.Sign(value) > 0) // Left
+                    leftArm.Rotate(transform.up * value);
+                else // Right
+                    RightArm.Rotate(transform.up * value);
+            }
         }
 
         Transform hips;
@@ -98,7 +118,7 @@ namespace Game
 
             if(Input.GetKey(KeyCode.LeftAlt))
             {
-                freeLookRotation = Mathf.Clamp(freeLookRotation + -Input.GetAxis("Mouse X") * sensitivity, -130f, 130f);
+                freeLookRotation = Mathf.Clamp(freeLookRotation + -Input.GetAxis("Mouse X") * sensitivity, -150f, 150f);
             }
             else
             {
@@ -107,6 +127,15 @@ namespace Game
                 transform.Rotate(Vector3.up * Input.GetAxis("Mouse X") * sensitivity);
             }
             ApplyFreeLookRotation(freeLookRotation);
+
+            if (Input.GetKey(KeyCode.E))
+                leanAngle = Mathf.MoveTowards(leanAngle, -50f, 150 * Time.deltaTime);
+            else if (Input.GetKey(KeyCode.Q))
+                leanAngle = Mathf.MoveTowards(leanAngle, 50f, 150 * Time.deltaTime);
+            else
+                leanAngle = Mathf.MoveTowards(leanAngle, 0f, 150 * Time.deltaTime);
+
+            ApplyLeanAngle(leanAngle);
         }
     }
 }
