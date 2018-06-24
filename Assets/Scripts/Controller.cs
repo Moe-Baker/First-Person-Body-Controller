@@ -109,7 +109,6 @@ namespace Game
 
         void LateUpdate()
         {
-            hips.localPosition = hipsPosition;
             hips.localRotation = hipsRotation;
 
 
