@@ -43,8 +43,10 @@ namespace Game
             var neck = animator.GetBoneTransform(HumanBodyBones.Neck);
             var head = animator.GetBoneTransform(HumanBodyBones.Head);
 
-            neck.Rotate(VerticalVector, value / 2f, Space.Self);
-            head.Rotate(VerticalVector, value / 2f, Space.Self);
+            int count = 2;
+
+            neck.Rotate(VerticalVector, value / count, Space.Self);
+            head.Rotate(VerticalVector, value / count, Space.Self);
         }
 
         float freeLookRotation = 0f;
@@ -56,7 +58,7 @@ namespace Game
             var spine = animator.GetBoneTransform(HumanBodyBones.Spine);
             var chest = animator.GetBoneTransform(HumanBodyBones.Chest);
 
-            float count = 4;
+            var count = 4;
 
             neck.Rotate(FreeLookVector, value / count, Space.Self);
             head.Rotate(FreeLookVector, value / count, Space.Self);
@@ -71,8 +73,10 @@ namespace Game
             var spine = animator.GetBoneTransform(HumanBodyBones.Spine);
             var chest = animator.GetBoneTransform(HumanBodyBones.Chest);
 
-            spine.Rotate(LeanVector, value / 3f, Space.Self);
-            chest.Rotate(LeanVector, value / 3f, Space.Self);
+            var count = 2;
+
+            spine.Rotate(LeanVector, value / count, Space.Self);
+            chest.Rotate(LeanVector, value / count, Space.Self);
 
             var leftArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
             var RightArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
@@ -110,7 +114,19 @@ namespace Game
         {
             hips.localRotation = hipsRotation;
 
-            if(Input.GetKey(KeyCode.LeftAlt))
+            //Lean
+            if (Input.GetKey(KeyCode.E))
+                leanAngle = Mathf.MoveTowards(leanAngle, -50f, 150 * Time.deltaTime);
+            else if (Input.GetKey(KeyCode.Q))
+                leanAngle = Mathf.MoveTowards(leanAngle, 50f, 150 * Time.deltaTime);
+            else
+                leanAngle = Mathf.MoveTowards(leanAngle, 0f, 150 * Time.deltaTime);
+
+            ApplyFreeLookRotation(freeLookRotation);
+
+
+            //Freelook
+            if (Input.GetKey(KeyCode.LeftAlt))
             {
                 freeLookRotation = Mathf.Clamp(freeLookRotation + -Input.GetAxis("Mouse X") * sensitivity, -150f, 150f);
             }
@@ -120,17 +136,10 @@ namespace Game
 
                 transform.Rotate(Vector3.up * Input.GetAxis("Mouse X") * sensitivity);
             }
-            ApplyFreeLookRotation(freeLookRotation);
-
-            if (Input.GetKey(KeyCode.E))
-                leanAngle = Mathf.MoveTowards(leanAngle, -50f, 150 * Time.deltaTime);
-            else if (Input.GetKey(KeyCode.Q))
-                leanAngle = Mathf.MoveTowards(leanAngle, 50f, 150 * Time.deltaTime);
-            else
-                leanAngle = Mathf.MoveTowards(leanAngle, 0f, 150 * Time.deltaTime);
-
             ApplyLeanAngle(leanAngle);
 
+            
+            //Vertical Look
             verticalRotation = Mathf.Clamp(verticalRotation + Input.GetAxis("Mouse Y") * sensitivity, -VerticallookLimit, VerticallookLimit);
             ApplyVerticalRotation(verticalRotation);
         }
