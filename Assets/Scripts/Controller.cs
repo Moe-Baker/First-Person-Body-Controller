@@ -34,7 +34,7 @@ namespace Game
         {
             get
             {
-                return Mathf.InverseLerp(130f * 2f, 0f, Mathf.Abs(freeLookRotation)) * 80f;
+                return Mathf.InverseLerp(130f * 8f, 0f, Mathf.Abs(freeLookRotation)) * 80f;
             }
         }
         Vector3 VerticalVector = Vector3.right;
