@@ -37,46 +37,77 @@ namespace Game
                 return Mathf.InverseLerp(130f * 2f, 0f, Mathf.Abs(freeLookRotation)) * 80f;
             }
         }
-        Vector3 VerticalVector = Vector3.forward;
+        Vector3 VerticalVector = Vector3.right;
         public void ApplyVerticalRotation(float value)
         {
             var neck = animator.GetBoneTransform(HumanBodyBones.Neck);
             var head = animator.GetBoneTransform(HumanBodyBones.Head);
+            var spine = animator.GetBoneTransform(HumanBodyBones.Spine);
+            var chest = animator.GetBoneTransform(HumanBodyBones.Chest);
+            var upperChest = animator.GetBoneTransform(HumanBodyBones.UpperChest);
 
-            int count = 2;
+            int count = value < 0f ? 5 : 4;
 
             neck.Rotate(VerticalVector, value / count, Space.Self);
             head.Rotate(VerticalVector, value / count, Space.Self);
+            chest.Rotate(VerticalVector, value / count, Space.Self);
+            upperChest.Rotate(VerticalVector, value / count, Space.Self);
+            if (value < 0f) spine.Rotate(VerticalVector, value / count, Space.Self);
+
+            var rightArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
+            var rightElbow = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
+
+            var leftArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+            var leftElbow = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
+
+            if(value < 0f)
+            {
+                rightArm.Rotate(chest.right, -value / 4, Space.World);
+
+                leftArm.Rotate(chest.right, -value / 4, Space.World);
+            }
+            else
+            {
+                rightArm.Rotate(chest.right, -value / 2, Space.World);
+                rightElbow.Rotate(chest.right, -value / 2 / 2, Space.World);
+
+                leftArm.Rotate(chest.right, -value / 2, Space.World);
+                leftElbow.Rotate(chest.right, -value / 2 / 2, Space.World);
+            }
         }
 
         float freeLookRotation = 0f;
-        Vector3 FreeLookVector = Vector3.right;
+        Vector3 FreeLookVector = Vector3.up;
         void ApplyFreeLookRotation(float value)
         {
             var neck = animator.GetBoneTransform(HumanBodyBones.Neck);
             var head = animator.GetBoneTransform(HumanBodyBones.Head);
             var spine = animator.GetBoneTransform(HumanBodyBones.Spine);
             var chest = animator.GetBoneTransform(HumanBodyBones.Chest);
+            var upperChest = animator.GetBoneTransform(HumanBodyBones.UpperChest);
 
-            var count = 4;
+            var count = 5;
 
             neck.Rotate(FreeLookVector, value / count, Space.Self);
             head.Rotate(FreeLookVector, value / count, Space.Self);
             spine.Rotate(FreeLookVector, value / count, Space.Self);
             chest.Rotate(FreeLookVector, value / count, Space.Self);
+            upperChest.Rotate(FreeLookVector, value / count, Space.Self);
         }
 
         float leanAngle = 0f;
-        Vector3 LeanVector = Vector3.up;
+        Vector3 LeanVector = Vector3.forward;
         void ApplyLeanAngle(float value)
         {
             var spine = animator.GetBoneTransform(HumanBodyBones.Spine);
             var chest = animator.GetBoneTransform(HumanBodyBones.Chest);
+            var upperChest = animator.GetBoneTransform(HumanBodyBones.UpperChest);
 
-            var count = 2;
+            var count = 3;
 
             spine.Rotate(LeanVector, value / count, Space.Self);
             chest.Rotate(LeanVector, value / count, Space.Self);
+            upperChest.Rotate(LeanVector, value / count, Space.Self);
 
             var leftArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
             var RightArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
@@ -84,9 +115,9 @@ namespace Game
             if(value != 0f)
             {
                 if (Mathf.Sign(value) > 0) // Left
-                    leftArm.Rotate(transform.up * value);
+                    leftArm.Rotate(Vector3.forward * -value);
                 else // Right
-                    RightArm.Rotate(transform.up * value);
+                    RightArm.Rotate(Vector3.forward * -value);
             }
         }
 
@@ -128,7 +159,7 @@ namespace Game
             //Freelook
             if (Input.GetKey(KeyCode.LeftAlt))
             {
-                freeLookRotation = Mathf.Clamp(freeLookRotation + -Input.GetAxis("Mouse X") * sensitivity, -150f, 150f);
+                freeLookRotation = Mathf.Clamp(freeLookRotation + Input.GetAxis("Mouse X") * sensitivity, -150f, 150f);
             }
             else
             {
@@ -140,7 +171,7 @@ namespace Game
 
             
             //Vertical Look
-            verticalRotation = Mathf.Clamp(verticalRotation + Input.GetAxis("Mouse Y") * sensitivity, -VerticallookLimit, VerticallookLimit);
+            verticalRotation = Mathf.Clamp(verticalRotation + -Input.GetAxis("Mouse Y") * sensitivity, -VerticallookLimit, VerticallookLimit);
             ApplyVerticalRotation(verticalRotation);
         }
     }
